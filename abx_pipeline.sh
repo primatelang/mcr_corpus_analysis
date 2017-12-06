@@ -71,16 +71,20 @@ done
 function create_abx_files {
     RTYPE=$1
 
-    extract_features -r "$RTYPE" \
-        -o "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" \
-        "${OUTPUT_DIR}/annotations.csv" \
-        "${OUTPUT_DIR}/${EXP_NAME}.cfg"
+    extract_features "${OUTPUT_DIR}/annotations.csv" \
+                     "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
+                  -o "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
+
+    reduce_features "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
+                    "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
+                 -r "${RTYPE}" \
+                 -o "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv"
 
     last_feature=$(head -n 1 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" | awk -F',' '{print NF}')
 
     prepare_abx "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" \
-        "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_results" \
-        --col_labels 1 --col_features 2-$last_feature
+                "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_results" \
+                --col_labels 1 --col_features 2-$last_feature
 }
 
 
@@ -104,25 +108,25 @@ echo
 create_abx_files raw
 
 
-echo "#################"
-echo "# Running ABX ..#"
-echo "#################"
-echo 
-echo "     ---> doing lda <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
-
-
-echo
-echo "     ---> doing pca <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
-
-
-echo
-echo "     ---> doing raw <---              "
-echo 
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
+###echo "#################"
+###echo "# Running ABX ..#"
+###echo "#################"
+###echo 
+###echo "     ---> doing abx lda <---              "
+###echo
+###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
+###
+###
+###echo
+###echo "     ---> doing abx pca <---              "
+###echo
+###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
+###
+###
+###echo
+###echo "     ---> doing abx raw <---              "
+###echo 
+###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
 
 source deactivate 
 
