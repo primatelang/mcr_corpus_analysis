@@ -108,25 +108,25 @@ echo
 create_abx_files raw
 
 
-###echo "#################"
-###echo "# Running ABX ..#"
-###echo "#################"
-###echo 
-###echo "     ---> doing abx lda <---              "
-###echo
-###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
-###
-###
-###echo
-###echo "     ---> doing abx pca <---              "
-###echo
-###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
-###
-###
-###echo
-###echo "     ---> doing abx raw <---              "
-###echo 
-###run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
+echo "#################"
+echo "# Running ABX ..#"
+echo "#################"
+echo 
+echo "     ---> doing abx lda <---              "
+echo
+run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
+
+
+echo
+echo "     ---> doing abx pca <---              "
+echo
+run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
+
+
+echo
+echo "     ---> doing abx raw <---              "
+echo 
+run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
 
 source deactivate 
 

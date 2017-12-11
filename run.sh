@@ -33,6 +33,11 @@ run_pipeline $input_dir $output_dir
 input_dir=./corpus/Blue_monkey/James_Fuller/Audio 
 output_dir=././outputs/Blue_monkey/James_Fuller/
 run_pipeline $input_dir $output_dir
+
+input_dir=./corpus/Blue_monkey/Joined
+output_dir=././outputs/Blue_monkey/Joined
+run_pipeline $input_dir $output_dir
+
 ###
 ###
 ###echo "...Colobus guereza..."
