@@ -20,7 +20,8 @@ function realpath {
     readlink -f "$1"
 }                                                                        
 export -f realpath;                                                      
-                                                                         
+
+
 # called on script errors                                                
 function failure { [ ! -z "$DATA_DIR" ] && echo "Error: $DATA_DIR"; exit 1; }          
                                                                          
@@ -44,7 +45,6 @@ rm -rf "$OUTPUT_DIR/*.csv" "$OUTPUT_DIR/wav" "$OUTPUT_DIR/${EXP_NAME}.*"
 #
 ## preparing data
 #
-
 mkdir -p "$OUTPUT_DIR/wav"
 echo "##################"
 echo "# Preparing data #"
@@ -67,26 +67,30 @@ for original_wav in "$DATA_DIR"/*.{WAV,wav,aif}; do
         -r 16000 "$new_wav".wav 2>&1 >> "$OUTPUT_DIR/${EXP_NAME}".log 
 done
 
-
+#
+## running feat extraction and ABX
+#
 function create_abx_files {
     RTYPE=$1
 
+    echo '         |--- extract_features'
     extract_features "${OUTPUT_DIR}/annotations.csv" \
                      "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
                   -o "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
 
+    echo '         |--- reduce_features'
     reduce_features "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
                     "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
-                 -r "${RTYPE}" \
+                 -r "${RTYPE}" --standard_scaler \
                  -o "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv"
-
+    
+    echo '         |--- prepare_abx'
     last_feature=$(head -n 1 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" | awk -F',' '{print NF}')
 
     prepare_abx "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" \
                 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_results" \
                 --col_labels 1 --col_features 2-$last_feature
 }
-
 
 
 echo "######################################"
@@ -107,6 +111,16 @@ echo "     ---> doing raw <---              "
 echo 
 create_abx_files raw
 
+echo
+echo "     ---> doing autoencoder <---              "
+echo 
+create_abx_files ae
+
+echo
+echo "     ---> doing tsne <---              "
+echo 
+create_abx_files tsne
+
 
 echo "#################"
 echo "# Running ABX ..#"
@@ -116,17 +130,25 @@ echo "     ---> doing abx lda <---              "
 echo
 run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
 
-
 echo
 echo "     ---> doing abx pca <---              "
 echo
 run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
 
-
 echo
 echo "     ---> doing abx raw <---              "
 echo 
 run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
+
+echo
+echo "     ---> doing abx autoencoder <---              "
+echo 
+run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_ae_results"
+
+echo
+echo "     ---> doing abx tsne <---              "
+echo 
+run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_tsne_results"
 
 source deactivate 
 
