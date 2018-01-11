@@ -37,35 +37,35 @@ DATA_PATH=$(realpath "$DATA_DIR")
 export DATA_DIR="${DATA_PATH}"
 
 
-####
-##### remove previous outputs
-####
-###rm -rf "$OUTPUT_DIR/*.csv" "$OUTPUT_DIR/wav" "$OUTPUT_DIR/${EXP_NAME}.*"
-###
-####
-##### preparing data
-####
-###mkdir -p "$OUTPUT_DIR/wav"
-###echo "##################"
-###echo "# Preparing data #"
-###echo "##################"
-###
-#### extracting annotations
-###echo "doing prep_annot"
-###prep_annot.sh "$DATA_DIR" "$OUTPUT_DIR"
-###
-###cd "$DATA_DIR"
-#### fixing sampling rate, wav files are in same directory than
-#### Praat TextGrid file
-###echo "fixing wav files type"
-###shopt -s nullglob
-###for original_wav in "$DATA_DIR"/*.{WAV,wav,aif}; do
-###    ext_file="${original_wav##*.}"
-###    new_wav="$OUTPUT_DIR/wav/"$(basename "$original_wav" .$ext_file | tr ' ' '_');
-###    echo "$original_wav -> $new_wav.wav" >> "${OUTPUT_DIR}/${EXP_NAME}".log
-###    sox -V0 "$original_wav" -e signed-integer -b 16 -c 1 \
-###        -r 16000 "$new_wav".wav 2>&1 >> "$OUTPUT_DIR/${EXP_NAME}".log
-###done
+#
+## remove previous outputs
+#
+rm -rf "$OUTPUT_DIR/*.csv" "$OUTPUT_DIR/wav" "$OUTPUT_DIR/${EXP_NAME}.*"
+
+#
+## preparing data
+#
+mkdir -p "$OUTPUT_DIR/wav"
+echo "##################"
+echo "# Preparing data #"
+echo "##################"
+
+# extracting annotations
+echo "doing prep_annot"
+prep_annot.sh "$DATA_DIR" "$OUTPUT_DIR"
+
+cd "$DATA_DIR"
+# fixing sampling rate, wav files are in same directory than
+# Praat TextGrid file
+echo "fixing wav files type"
+shopt -s nullglob
+for original_wav in "$DATA_DIR"/*.{WAV,wav,aif}; do
+    ext_file="${original_wav##*.}"
+    new_wav="$OUTPUT_DIR/wav/"$(basename "$original_wav" .$ext_file | tr ' ' '_');
+    echo "$original_wav -> $new_wav.wav" >> "${OUTPUT_DIR}/${EXP_NAME}".log
+    sox -V0 "$original_wav" -e signed-integer -b 16 -c 1 \
+        -r 16000 "$new_wav".wav 2>&1 >> "$OUTPUT_DIR/${EXP_NAME}".log
+done
 
 
 #
