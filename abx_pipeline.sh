@@ -13,7 +13,7 @@ EXP_NAME="$1"
 DATA_DIR="$2"
 OUTPUT_DIR="$3"
 
-source activate abx
+# source activate abx
 
 # equivalent to $(readlink -f $1) in pure bash (compatible with macos)
 function realpath {
@@ -74,7 +74,11 @@ done
 function create_abx_files {
     RTYPE=$1
 
+    echo
+    echo "     ---> doing $RTYPE <---              "
+    echo
     echo '         |--- extract_features'
+
     extract_features "${OUTPUT_DIR}/annotations.csv" \
                      "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
                   -o "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
@@ -89,78 +93,47 @@ function create_abx_files {
     echo '         |--- prepare_abx'
     last_feature=$(head -n 1 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" | awk -F',' '{print NF}')
 
+    cp "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" all.txt
+    grep -E 'h|KA|p|PY' "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" > algo.txt
+    cp algo.txt "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv"
     prepare_abx "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" \
                 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_results" \
                 --col_labels 1 --col_features 2-$last_feature
+}
+
+function run_abx_ {
+    FNAME="$1"
+    echo
+    echo "     ---> running abx $FNAME <---              "
+    echo
+    run_abx -j 4 --on "call" "$FNAME" 
 }
 
 
 echo "######################################"
 echo "# Preparing item and feature files ..#"
 echo "######################################"
-echo
-echo "     ---> doing lda <---              "
-echo
 create_abx_files lda
-
-echo
-echo "     ---> doing lsa <---              "
-echo
 create_abx_files lsa
-
-echo
-echo "     ---> doing pca <---              "
-echo
 create_abx_files pca
-
-echo
-echo "     ---> doing raw <---              "
-echo
 create_abx_files raw
-
-echo
-echo "     ---> doing autoencoder <---              "
-echo
-create_abx_files ae
-
-echo
-echo "     ---> doing tsne <---              "
-echo
 create_abx_files tsne
+create_abx_files ae
+create_abx_files lstm
+create_abx_files triplet_loss 
 
 
 echo "#################"
 echo "# Running ABX ..#"
 echo "#################"
-#echo
-echo "     ---> doing abx lda <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lsa_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_tsne_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_ae_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lstm_results"
+run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_triplet_loss_results"
 
-echo
-echo "     ---> doing abx lsa <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_lsa_results"
-
-echo
-echo "     ---> doing abx pca <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
-
-echo
-echo "     ---> doing abx raw <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
-
-echo
-echo "     ---> doing abx autoencoder <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_ae_results"
-
-echo
-echo "     ---> doing abx tsne <---              "
-echo
-run_abx --on "call" "${OUTPUT_DIR}/${EXP_NAME}_tsne_results"
-
-source deactivate
+# source deactivate
 
