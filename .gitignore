@@ -14,3 +14,6 @@ train_annotations.csv
 
 *.TextGrid
 corpus/
+.cache/
+
+.ipynb_checkpoints/

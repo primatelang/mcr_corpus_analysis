@@ -3,6 +3,8 @@ Content Description
 ===================
 
 
+- jupyter/: various python experiments in jupyter notebooks
+
 - config/: it contains the configuration files use by [[mcr][https://github.com/primatelang/mcr]]
           scripts, the name of the configuration file describe the experiment, for example
            

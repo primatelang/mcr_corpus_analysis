@@ -71,69 +71,70 @@ done
 #
 ## running feat extraction and ABX
 #
-function create_abx_files {
+function extract_features_ {
     RTYPE=$1
-
-    echo
-    echo "     ---> doing $RTYPE <---              "
-    echo
-    echo '         |--- extract_features'
-
+    echo "extract_features $RTYPE" 
     extract_features "${OUTPUT_DIR}/annotations.csv" \
                      "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
-                  -o "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
+                  -o "${OUTPUT_DIR}/${EXP_NAME}_original_features.csv" \
 
-    echo '         |--- reduce_features'
-    reduce_features "${OUTPUT_DIR}/${EXP_NAME}_features.csv" \
+}
+
+function reduce_features_ {
+    RTYPE=$1
+    echo "reduce_features $RTYPE"
+    reduce_features "${OUTPUT_DIR}/${EXP_NAME}_original_features.csv" \
                     "${OUTPUT_DIR}/${EXP_NAME}.cfg" \
                  -r "${RTYPE}" --standard_scaler \
-                 --standard_scaler \
-                 -o "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv"
+                 -o "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_features.csv"
 
-    echo '         |--- prepare_abx'
-    last_feature=$(head -n 1 "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" | awk -F',' '{print NF}')
-
-    cp "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" all.txt
-    grep -E 'h|KA|p|PY' "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" > algo.txt
-    cp algo.txt "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv"
-    prepare_abx "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_input.csv" \
-                "${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}_results" \
-                --col_labels 1 --col_features 2-$last_feature
 }
 
 function run_abx_ {
-    FNAME="$1"
-    echo
-    echo "     ---> running abx $FNAME <---              "
-    echo
-    run_abx -j 4 --on "call" "$FNAME" 
+    RTYPE=$1
+    echo "computing_abx $RTYPE"
+    bfile="${OUTPUT_DIR}/${EXP_NAME}_${RTYPE}"
+    last_feature=$(head -n 1 "${bfile}_features.csv" | awk -F',' '{print NF}')
+    compute_abx "${bfile}_features.csv" --col_on 1 --col_features 2-$last_feature > "${bfile}_abx.csv"
 }
 
 
-echo "######################################"
-echo "# Preparing item and feature files ..#"
-echo "######################################"
-create_abx_files lda
-create_abx_files lsa
-create_abx_files pca
-create_abx_files raw
-create_abx_files tsne
-create_abx_files ae
-create_abx_files lstm
-create_abx_files triplet_loss 
+echo "#########################################"
+echo "# Extracting features from acustic data #"
+echo "#########################################"
+extract_features_ lda
+extract_features_ lsa
+extract_features_ pca
+extract_features_ raw
+extract_features_ tsne
+extract_features_ ae
+extract_features_ lstm
+extract_features_ tripletloss 
 
+
+echo "#####################################"
+echo "# Dimensional reduction of features #"
+echo "#####################################"
+reduce_features_ lda
+reduce_features_ lsa
+reduce_features_ pca
+reduce_features_ raw
+reduce_features_ tsne
+reduce_features_ ae
+reduce_features_ lstm
+reduce_features_ tripletloss 
 
 echo "#################"
 echo "# Running ABX ..#"
 echo "#################"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lda_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lsa_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_pca_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_raw_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_tsne_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_ae_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_lstm_results"
-run_abx_ "${OUTPUT_DIR}/${EXP_NAME}_triplet_loss_results"
+run_abx_ lda
+run_abx_ lsa
+run_abx_ pca
+run_abx_ raw
+run_abx_ tsne
+run_abx_ ae
+run_abx_ lstm
+run_abx_ tripletloss
 
 # source deactivate
 
