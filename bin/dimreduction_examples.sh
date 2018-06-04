@@ -34,20 +34,20 @@ ANNOTATIONS=inputs/annotations.bluemonkeys
 #################################################
 ### PIPELINE FOR VARIABLE SIZE ACUSTIC WINDOW ###
 #################################################
-#rm -rf .cache
-## get the features for all calls and for free length window            
-#extract_features -o "${EXP_NAME_FREE}_original_features.csv" "$ANNOTATIONS" "$ALGO_CONFIG_FREE"
-#
-## REDMETHOD options are: ae, lstm, tripletloss
-#REDMETHOD="lstm"
-#reduce_features "${EXP_NAME_FREE}_original_features.csv" \
-#    "$ALGO_CONFIG_FREE" -r $REDMETHOD --standard_scaler \
-#    -o "${EXP_NAME_FREE}_${REDMETHOD}_features.csv"
-#
-#feature_size=`head -n 1 "${EXP_NAME_FREE}_${REDMETHOD}_features.csv" | awk -F',' '{print NF}'`
-#compute_abx "${EXP_NAME_FREE}_${REDMETHOD}_features.csv" \
-#    --col_on 1 \
-#    --col_features 2-$feature_size > "${EXP_NAME_FREE}_${REDMETHOD}_abx.csv"
+rm -rf .cache
+# get the features for all calls and for free length window            
+extract_features -o "${EXP_NAME_FREE}_original_features.csv" "$ANNOTATIONS" "$ALGO_CONFIG_FREE"
+
+# REDMETHOD options are: ae, lstm, tripletloss
+REDMETHOD="lstm"
+reduce_features "${EXP_NAME_FREE}_original_features.csv" \
+    "$ALGO_CONFIG_FREE" -r $REDMETHOD --standard_scaler \
+    -o "${EXP_NAME_FREE}_${REDMETHOD}_features.csv"
+
+feature_size=`head -n 1 "${EXP_NAME_FREE}_${REDMETHOD}_features.csv" | awk -F',' '{print NF}'`
+compute_abx "${EXP_NAME_FREE}_${REDMETHOD}_features.csv" \
+    --col_on 1 \
+    --col_features 2-$feature_size > "${EXP_NAME_FREE}_${REDMETHOD}_abx.csv"
 
 
 
