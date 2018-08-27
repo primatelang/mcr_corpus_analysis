@@ -21,4 +21,6 @@ corpus/
 .cache/
 
 
+inputs/*
+
 .ipynb_checkpoints/
